@@ -1,10 +1,11 @@
-# Supplementary data for the paper: Arctic phytoplankton spring bloom diversity across the marginal ice zone in Baffin Bay
+# Supplementary data for the paper: Arctic phytoplankton microdiversity across the marginal ice zone suggests sub-species vulnerability to sea-ice loss
 Catherine Gérikas Ribeiro, Adriana Lopes dos Santos, Nicole Trefault, Dominique Marie, Connie Lovejoy and Daniel Vaulot
 
 ## \AMUNDSEN_supplementary_material
 
 * GE_Amundsen_supplementary.pdf
 * table_S1.xlsx
+* table_S2.xlsx
 
 ## \AMUNDSEN_sequence_analysis
 
