@@ -1,7 +1,7 @@
 ---
-title: "Phytoplankton spring bloom diversity across the marginal ice zone in Baffin Bay, Arctic"
+title: "Arctic phytoplankton microdiversity across the marginal ice zone suggests sub-species vulnerability to sea-ice loss"
 author: "Catherine Gérikas Ribeiro"
-date: "04/03/2022"
+date: "05/08/2023"
 output: 
   rmdformats::readthedown:
     highlight: kate
@@ -33,9 +33,9 @@ opts_knit$set(width=75)
 
 # Presentation
 
-> Procotol used to generate data for the paper "Phytoplankton spring bloom diversity across the marginal ice zone in Baffin Bay, Arctic". 
-Authors: Catherine Gérikas Ribeiro, Daniel Vaulot, Dominique Marie, Nicole Trefault, Connie Lovejoy, and Adriana Lopes dos Santos.
-catherine.gerikas@gmail.com
+> Procotol used to generate data for the paper "Arctic phytoplankton microdiversity across the marginal ice zone suggests sub-species vulnerability to sea-ice loss".
+
+Authors:Catherine Gérikas Ribeiro, Daniel Vaulot, Dominique Marie, Nicole Trefault, Connie Lovejoy, and Adriana Lopes dos Santos.
 
 
 # Load libraries
@@ -77,7 +77,7 @@ library("ggfortify")
 ```{r define_colors}
 
 # class
-class_excluded <- c("Chrysophyceae", "Bangiophyceae", "Florideophyceae", "Xanthophyceae", "Phaeophyceae") 
+class_excluded <- c("Bangiophyceae", "Florideophyceae", "Xanthophyceae", "Phaeophyceae") 
 class_colors <- read_excel("colors.xlsx", sheet = "classes") %>% filter(!(class %in% class_excluded))
 class_colors <-structure(class_colors$color_name,.Names=class_colors$class) 
  
@@ -101,13 +101,13 @@ division_colors <-structure(division_colors$color_name,.Names=division_colors$di
 
 # Build a phyloseq object from Excel tables
 
-## Import excel table
+## Importing excel table
 
 ```{r importing_table}
 
   OTU_tb <- read.table(as.matrix("OTU_table.txt"), row.names=1)
   TAX_tb <- read.table("TAX_table.txt")
-  SAMPLE_tb <- read.table("SAMPLE_DATA_table.csv", header = TRUE, sep = ";", quote = "\"", dec = ",", fill = TRUE, comment.char = "", row.names=1)
+  SAMPLE_tb <- read.table("SAMPLE_DATA_table2.csv", header = TRUE, sep = ";", quote = "\"", dec = ",", fill = TRUE, comment.char = "", row.names=1)
 
 ```
 
@@ -161,19 +161,23 @@ division_colors <-structure(division_colors$color_name,.Names=division_colors$di
 
 ```
 
-## Remove Dinoflagellata reads 
+## Filter Dinoflagellata reads 
 
-```{r remove_dinos}
+```{r filter_dinos}
 
   physeq_nonDino <- subset_taxa(physeq_readsmin_nonMetazoa, division != "Dinoflagellata")
-
+  physeq_Dino <- subset_taxa(physeq_readsmin_nonMetazoa, division == "Dinoflagellata")
+  
 ```
 
 ## Extract photosynthetic taxa
 
 ```{r extract_photo}
 
-  physeq_photo2 <- subset_taxa(physeq_nonDino, (division %in% c("Chlorophyta", "Cryptophyta", "Haptophyta", "Ochrophyta", "Cercozoa")) & !(class %in% c("Syndiniales", "Sarcomonadea", "Chrysophyceae", "Filosa-Thecofilosea", "Filosa-Imbricatea", "Filosa-Granofilosea", "Chlorarachniophyceae")))
+physeq_photo3 <- subset_taxa(physeq_nonDino, 
+                             (division %in% c("Chlorophyta", "Cryptophyta", "Haptophyta", "Ochrophyta", "Cercozoa")) 
+                             & !(class %in% c("Syndiniales", "Sarcomonadea", "Filosa-Thecofilosea", "Filosa-Imbricatea", "Filosa-Granofilosea", "Chlorarachniophyceae")) & !genus == "Spumella"
+                             )
 
 ```
 
@@ -182,16 +186,16 @@ division_colors <-structure(division_colors$color_name,.Names=division_colors$di
 
 ```{r size_fractions}
 
-  physeq_0_2um_b <- subset_samples(physeq_photo2, size_fraction %in% ("0-2um"))
-  physeq_3um_b <- subset_samples(physeq_photo2, size_fraction %in% ("3um"))
-  physeq_20um_b <- subset_samples(physeq_photo2, size_fraction %in% ("20um"))
+  physeq_0_2um_b <- subset_samples(physeq_photo3, size_fraction %in% ("0-2um"))
+  physeq_3um_b <- subset_samples(physeq_photo3, size_fraction %in% ("3um"))
+  physeq_20um_b <- subset_samples(physeq_photo3, size_fraction %in% ("20um"))
 
 ```
 
 
 ## Abundant taxa
 
-Select taxa comprising the 90% most abundant sequences in at least 1 sample on each size fraction. For selection disregarding size fraction it was used 1/10 of the samples to include less taxa.
+Select taxa comprising the 90% most abundant ASVs in at least 1 sample on each size fraction. For selection disregarding size fraction it was used 1/10 of the samples to include less taxa.
 
 ```{r abundant_taxa}
 
@@ -206,27 +210,26 @@ Select taxa comprising the 90% most abundant sequences in at least 1 sample on e
   wh20 <- genefilter_sample(physeq_20um_b, f1_b, A=1) 
   physeq_20um_b_abund <- prune_taxa(wh20, physeq_20um_b)
 
-  nsamples_whall <- (1/10*nsamples(physeq_photo2))
-  whall <- genefilter_sample(physeq_photo2, f1_b, A=nsamples_whall) 
-  physeq_photo2_abund <- prune_taxa(whall, physeq_photo2)
+  nsamples_whall <- (1/10*nsamples(physeq_photo3))
+  whall <- genefilter_sample(physeq_photo3, f1_b, A=nsamples_whall) 
+  physeq_photo3_abund <- prune_taxa(whall, physeq_photo3)
 
 # Another function for upset images
 
-  f1_c <- filterfun_sample(topf(0.7)) #creates a function to keep 70% most abundant sequences
-  whall_up <- genefilter_sample(physeq_photo2, f1_c, A=1) 
-  physeq_photo2_abund_upset <- prune_taxa(whall_up, physeq_photo2)
+  f1_c <- filterfun_sample(topf(0.7)) #creates a function to keep 70% most sequences
+  whall_up <- genefilter_sample(physeq_photo3, f1_c, A=1) 
+  physeq_photo3_abund_upset <- prune_taxa(whall_up, physeq_photo3)
 
 ```
-
 
 
 ## Compile data by taxa ranks with tax_glom
 
 ```{r tax_glom}
 
-  TG_division <- tax_glom(physeq_photo2_abund, "division")
-  TG_class <- tax_glom(physeq_photo2_abund, "class")
-  TG_genus <- tax_glom(physeq_photo2_abund, "genus")
+  TG_division <- tax_glom(physeq_photo3_abund, "division")
+  TG_class <- tax_glom(physeq_photo3_abund, "class")
+  TG_genus <- tax_glom(physeq_photo3_abund, "genus")
 
 ```
 
@@ -234,9 +237,9 @@ Select taxa comprising the 90% most abundant sequences in at least 1 sample on e
 
 ```{r melt_phyloseq}
 
-  melt_physeq_photo2 <- psmelt(physeq_photo2) 
-  melt_physeq_photo2_abund <- psmelt(physeq_photo2_abund)
-  melt_physeq_photo2_abund_upset <- psmelt(physeq_photo2_abund_upset)
+  melt_physeq_photo3 <- psmelt(physeq_photo3) 
+  melt_physeq_photo3_abund <- psmelt(physeq_photo3_abund)
+  melt_physeq_photo3_abund_upset <- psmelt(physeq_photo3_abund_upset)
   melt_TG_division <- psmelt(TG_division)
   melt_TG_class <- psmelt(TG_class)
   melt_TG_genus <- psmelt(TG_genus)
@@ -256,9 +259,9 @@ melt_TG_class$by_OW_minus10_10 <- factor(melt_TG_class$by_OW_minus10_10, levels 
 melt_TG_genus$by_OW_minus10_10 <- factor(melt_TG_genus$by_OW_minus10_10, levels = c("UI", "MIZ", "OW"))
 
 # order by size fraction (fraction_name)
-melt_TG_division$fraction_name <- factor(melt_TG_division$fraction_name, levels = c("0.2-3 µm", "3-20 µm", "> 20 µm"))
-melt_TG_class$fraction_name <- factor(melt_TG_class$fraction_name, levels = c("0.2-3 µm", "3-20 µm", "> 20 µm"))
-melt_TG_genus$fraction_name <- factor(melt_TG_genus$fraction_name, levels = c("0.2-3 µm", "3-20 µm", "> 20 µm"))
+melt_TG_division$fraction_name <- factor(melt_TG_division$fraction_name, levels = c("0.2-3 um", "3-20 um", "> 20 um"))
+melt_TG_class$fraction_name <- factor(melt_TG_class$fraction_name, levels = c("0.2-3 um", "3-20 um", "> 20 um"))
+melt_TG_genus$fraction_name <- factor(melt_TG_genus$fraction_name, levels = c("0.2-3 um", "3-20 um", "> 20 um"))
 
 # order genus by division
 melt_TG_genus <- melt_TG_genus %>%
@@ -286,8 +289,6 @@ bar_division <- ggplot(melt_TG_division, aes(x = depth_rank, y = Abundance, fill
 
 bar_division
 
-ggsave("./IMAGES/figure_barplot_division.png")
-
 ```
 
 ## Depth x Abundance (Genus)
@@ -308,11 +309,7 @@ bar_genus <- ggplot(melt_TG_genus, aes(x = depth_rank, y = Abundance, fill = gen
 
 bar_genus
 
-ggsave("./IMAGES/figure_barplot_genus.png")
-
 ```
-
-
 
 # Data management
 
@@ -322,7 +319,7 @@ Creating a single table with added abundances by taxa ranks
 
 ```{r subset_genus}
 
-genus_abund_table <- subset(melt_physeq_photo2_abund, 
+genus_abund_table <- subset(melt_physeq_photo3_abund, 
                      select = c("OTU", 
                                 "Sample", 
                                 "Abundance", 
@@ -332,7 +329,7 @@ genus_abund_table <- subset(melt_physeq_photo2_abund,
 
 ## Sum of reads abundance by GENUS
 
-```{r sum_genus}
+```{r sum_genus, echo=FALSE, cache=FALSE, warning=FALSE}
 
 # extract dimensions info from the initial matrix, select the last vertical element
 dimension_table <- dim(genus_abund_table)
@@ -401,9 +398,6 @@ ggplot(SD_20um, aes(x=depth_rank, y= SD_20um[,i], group=station_id, color=by_OW_
   geom_point(size = 4, alpha = 0.4) +
   facet_wrap("by_OW_minus10_10")  
  
-ggsave(filename = paste("figure_FCM_", i, ".png", sep=""), path ="./IMAGES", dpi = 300, height = 5, width = 7)
-
-
 }
 
 
@@ -414,11 +408,6 @@ ggsave(filename = paste("figure_FCM_", i, ".png", sep=""), path ="./IMAGES", dpi
 ![Nano-phytoplankton](./IMAGES/figure_FCM_nano_ml.png)
 
 ![Cryptophyceae](./IMAGES/figure_FCM_crypto_ml.png)
-
-
-
-
-
 
 
 # Upset plots
@@ -475,8 +464,8 @@ return(upset_MERGED)
 
 # create set
 
-upset_MERGED_ALL_upset <- upset_df_maker_function(physeq_photo2_abund_upset)
-upset_MERGED_ALL <- upset_df_maker_function(physeq_photo2)
+upset_MERGED_ALL_upset <- upset_df_maker_function(physeq_photo3_abund_upset)
+upset_MERGED_ALL <- upset_df_maker_function(physeq_photo3)
 
 
 ```
@@ -513,13 +502,14 @@ upset_MERGED_ALL <- upset_df_maker_function(physeq_photo2)
   base_annotations=list(
     'Shared ASVs'=intersection_size(
       mapping=aes(fill=class), counts = FALSE, text_colors = c(on_background="gray40", on_bar="gray40"), text = list(size=3, vjust=-0.7))
-      + scale_fill_manual(values = class_colors) 
+          + scale_fill_manual(values = class_colors) 
 
     ),
   
   annotations = list('Read abundance (log10)'=(
       ggplot(mapping=aes(y=log10(Abundance)))
       + geom_jitter(aes(color=class), size=7, na.rm=TRUE, show.legend = FALSE, width = 0.2)
+     # + geom_label_repel(aes(label= OTU), hjust=0, vjust=0, box.padding = 0.1, max.overlaps = 30, seed = 1)
       + scale_color_manual(values = class_colors) 
       + geom_violin(alpha=0.3, na.rm=TRUE))),
  
@@ -531,11 +521,10 @@ upset_MERGED_ALL <- upset_df_maker_function(physeq_photo2)
 
 
  upsALL <- upset_figure_function(upset_MERGED_ALL_upset)
- #ggsave("./IMAGES/figure_upset_abundant_photo.png", height = 15, width = 15)
+ ggsave("./IMAGES/figure_upset_abundant_photo.png", height = 15, width = 15)
  upsALL
 
 ```
-
 
 # Number of ASVs per genus
 
@@ -613,8 +602,6 @@ bubble_asv <- ggplot(matrix_df_xm, aes(x = Sectors, y = genus)) +
   theme(axis.text.y = element_text(size = 5), axis.text.x = element_text(size = 5), legend.title = element_text(size = 5), legend.text = element_text(size = 5), axis.title = element_text(size = 7)) 
 
 bubble_asv
-
-ggsave("./IMAGES/figure_count_asvs.png", dpi = 300, width = 3, height = 4)
 
 ```
 
@@ -701,7 +688,7 @@ sig.env.scrs <- subset(env.scores.en, pval<=0.05) #subset data to show variables
 
 #ordering factors
 
-site.scrs$fraction_name <- factor(site.scrs$fraction_name, levels = c("0.2-3 µm", "3-20 µm", "> 20 µm"))
+site.scrs$fraction_name <- factor(site.scrs$fraction_name, levels = c("0.2-3 um", "3-20 um", "> 20 um"))
 site.scrs$by_OW_minus10_10 <- factor(site.scrs$by_OW_minus10_10, levels = c("UI", "MIZ", "OW"))
 
 
@@ -732,11 +719,9 @@ NMDS_vectors_plot_genus_sections_V2 +
   ggrepel::geom_text_repel(data = sig.env.scrs, aes(x=NMDS1, y=NMDS2, label = env.variables), cex = 3, direction = "both", segment.size = 0.25)  #add labels for env variables
 
  
-  ggsave("./IMAGES/NMDS_vectors_env.png")
- 
 ```
 
-# Indicator species
+ # Indicator species
 
 From: <https://jkzorz.github.io/2019/07/02/Indicator-species-analysis.html> <https://cran.r-project.org/web/packages/indicspecies/vignettes/indicspeciesTutorial.pdf> <https://onlinelibrary.wiley.com/doi/abs/10.1111/j.1600-0706.2010.18334.x>
 
@@ -819,7 +804,7 @@ summary(inv_20um, indvalcomp = TRUE)
 
   physeq_readsmin_richness@sam_data$by_OW_minus10_10 <- factor(physeq_readsmin_richness@sam_data$by_OW_minus10_10, levels = c("UI", "MIZ", "OW"))
 
-  physeq_readsmin_richness@sam_data$fraction_name <- factor(physeq_readsmin_richness@sam_data$fraction_name, levels = c("0.2-3 µm", "3-20 µm", "> 20 µm"))
+  physeq_readsmin_richness@sam_data$fraction_name <- factor(physeq_readsmin_richness@sam_data$fraction_name, levels = c("0.2-3 um", "3-20 um", "> 20 um"))
 
   physeq_readsmin_richness@sam_data$depth_rank <- factor(physeq_readsmin_richness@sam_data$depth_rank, levels = c("1", "2", "3", "4", "5", "6"))
 
@@ -844,8 +829,7 @@ rich01 + geom_point(size=3, alpha=0.5, width = 0.2, position = position_jitter(w
                     scale_colour_manual(values = c("gray70", "orange", "steelblue")) +
                     labs(x= "Size fraction") 
 
-  ggsave("./IMAGES/figure_alpha_richness.png", dpi = 300)
-  
+
   
 ```
 
@@ -882,7 +866,7 @@ for (i in nm) {
     stat_compare_means(comparisons = stat_comparisons, label = "p.signif") ) +
     theme(axis.text.y = element_text(margin = margin(l = 10)), axis.text.x = element_text(margin = margin(b = 5)) )
 
-ggsave(filename = paste("figure_env_", i,".png", sep=""), path = "./IMAGES", dpi = 300)
+#ggsave(filename = paste("figure_", i,".png", sep=""), path = "./IMAGES/ENVIRONMENTAL", dpi = 300)
 
 }
 
