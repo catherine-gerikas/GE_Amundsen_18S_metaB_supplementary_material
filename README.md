@@ -5,7 +5,7 @@ Catherine Gérikas Ribeiro, Adriana Lopes dos Santos, Nicole Trefault, Dominique
 
     * Data_S1 - Environmental samples and data.xlsx
 
-## AMUNDSEN sequence analysis (Files needed for sequence analysis & outputs)
+## Sequence analysis (Files needed for sequence analysis & outputs)
 
     * GE_AM_phyloseq.Rmd
     * GE_AM_phyloseq.html
