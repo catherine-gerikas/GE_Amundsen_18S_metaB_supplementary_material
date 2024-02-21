@@ -1,11 +1,7 @@
-# Supplementary data for the paper: Arctic phytoplankton microdiversity across the marginal ice zone suggests sub-species vulnerability to sea-ice loss
+# Supplementary data for the paper "Arctic phytoplankton microdiversity across the marginal ice zone: sub-species vulnerability to sea-ice loss"
 Catherine Gérikas Ribeiro, Adriana Lopes dos Santos, Nicole Trefault, Dominique Marie, Connie Lovejoy and Daniel Vaulot
 
-## \AMUNDSEN_supplementary_material
-
-* GE_Amundsen_supplementary.pdf
-* table_S1.xlsx
-* table_S2.xlsx
+## Data S1
 
 ## \AMUNDSEN_sequence_analysis
 
