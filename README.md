@@ -5,7 +5,11 @@ Catherine Gérikas Ribeiro, Adriana Lopes dos Santos, Nicole Trefault, Dominique
 
     * Data_S1 - Environmental samples and data.xlsx
 
-## Sequence analysis (Files needed for sequence analysis & outputs)
+## Supplementary material
+
+    * Supplementary_material.pdf (supplementary Tables S1 and S2; Supplementary Figures 1-9)
+
+## Sequence analysis (files needed for sequence analysis & outputs)
 
     * GE_AM_phyloseq.Rmd
     * GE_AM_phyloseq.html
