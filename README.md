@@ -7,7 +7,7 @@ Catherine Gérikas Ribeiro, Adriana Lopes dos Santos, Nicole Trefault, Dominique
 
 ## Supplementary material
 
-    * Supplementary_material.pdf (supplementary Tables S1 and S2; Supplementary Figures 1-9)
+    * Supplementary_material.pdf (Supplementary Tables S1 and S2; Supplementary Figures 1-9)
 
 ## Sequence analysis (files needed for sequence analysis & outputs)
 
